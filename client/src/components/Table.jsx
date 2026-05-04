@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Modal from "./Modal";
 
-const Table = ({ columns, data, onDesactivar }) => {
+const Table = ({ columns, data, onDesactivar, onEdit }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [detalles, setDetalles] = useState({});
 
@@ -51,6 +51,15 @@ const Table = ({ columns, data, onDesactivar }) => {
                       >
                         Eliminar
                       </button>
+                      {onEdit && (
+                        <button
+                          className="action-button editar"
+                          onClick={() => onEdit(row)}
+                          style={{ backgroundColor: "#eab308", color: "white" }}
+                        >
+                          Editar
+                        </button>
+                      )}
                     </td>
                   ) : (
                     <td key={colIndex}>{row[col]}</td>

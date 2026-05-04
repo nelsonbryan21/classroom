@@ -17,8 +17,8 @@ export const AuthProvider = ({ children }) => {
       initialUser = JSON.parse(storedUser);
     }
   } catch (error) {
-    console.error("Error al parsear usuario guardado:", error);
-    localStorage.removeItem("user"); 
+    // console.error("Error al parsear usuario guardado:", error);
+    localStorage.removeItem("user");
   }
 
   const [user, setUser] = useState(initialUser);
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
         };
         setUser(userData);
       } catch (error) {
-        console.error("Error decodificando token:", error);
+        // console.error("Error decodificando token:", error);
         logout();
       }
     } else {
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }) => {
         setToken(token);
         localStorage.setItem("jwtToken", token);
         localStorage.setItem("user", JSON.stringify(user));
-        return { success: true};
+        return { success: true };
       } else {
         return {
           success: false,

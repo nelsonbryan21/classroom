@@ -138,9 +138,67 @@ const listUsers = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  const docenteId = req.params.id;
+  const { nombre, apellido, correo, dni, contrasena } = req.body;
+  const image = req.file ? req.file.filename : null;
+
+  try {
+    const docenteRes = await pool.query("SELECT usuario_id FROM docentes WHERE id = $1", [docenteId]);
+    if (docenteRes.rows.length === 0) return res.status(404).json({ success: false, error: "Docente no encontrado" });
+    const usuarioId = docenteRes.rows[0].usuario_id;
+
+    // Validar Correo y DNI únicos si se cambian (excluyendo el actual)
+    const userExist = await pool.query("SELECT * FROM usuarios WHERE username = $1 AND id != $2", [correo, usuarioId]);
+    if (userExist.rows.length > 0) {
+      return res.status(400).json({ success: false, error: "El correo electrónico ya está en uso." });
+    }
+    const dniExist = await pool.query("SELECT * FROM docentes WHERE dni = $1 AND id != $2", [dni, docenteId]);
+    if (dniExist.rows.length > 0) {
+      return res.status(400).json({ success: false, error: "El DNI proporcionado ya está en uso." });
+    }
+
+    // Actualizar docente
+    await pool.query(
+      "UPDATE docentes SET nombre = $1, apellido = $2, correo = $3, dni = $4 WHERE id = $5",
+      [nombre, apellido, correo, dni, docenteId]
+    );
+
+    // Actualizar usuario
+    let userQuery = "UPDATE usuarios SET username = $1";
+    let params = [correo];
+    let counter = 2;
+
+    if (contrasena) {
+      const hashedPassword = await bcrypt.hash(contrasena, 8);
+      userQuery += `, password_hash = $${counter}`;
+      params.push(hashedPassword);
+      counter++;
+    }
+
+    if (image) {
+      userQuery += `, imagen = $${counter}`;
+      params.push(image);
+      counter++;
+    }
+
+    userQuery += ` WHERE id = $${counter}`;
+    params.push(usuarioId);
+
+    await pool.query(userQuery, params);
+
+    res.json({ success: true, message: "Docente actualizado correctamente" });
+  } catch (error) {
+    console.error("Error en updateUser:", error);
+    res.status(500).json({ success: false, error: "Error en el servidor" });
+  }
+};
+
+
 
 module.exports = {
   registerUsers,
   listUsers,
   sendValidationCode,
+  updateUser,
 };

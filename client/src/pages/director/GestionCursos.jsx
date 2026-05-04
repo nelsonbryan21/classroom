@@ -147,14 +147,19 @@ export default function GestionCursos() {
             <div className="form-grid">
               <div className="form-class form-group">
                 <label className="form-label">Nombre del curso</label>
-                <input
-                  type="text"
+                <select
                   name="curso"
-                  className="form-input"
-                  placeholder="Ej: Matemáticas"
-                  onChange={(e) => setNombreCurso(e.target.value)}
+                  className="form-select"
                   required
-                />
+                  onChange={(e) => setNombreCurso(e.target.value)}
+                >
+                  <option value="">Seleccione un curso</option>
+                  <option value="matematica">Matemáticas</option>
+                  <option value="comunicacion">Comunicación</option>
+                  <option value="ciencia y ambiente">Ciencia y Ambiente</option>
+                  <option value="personal social">Personal Social</option>
+                  <option value="motricidad">Motricidad</option>
+                </select>
               </div>
 
               <div className="form-class form-group">
@@ -260,15 +265,15 @@ export default function GestionCursos() {
               <div className="detallesCurso">
                 <h2>{cursoSeleccionado.curso}</h2>
                 <p>
-                  <strong>Añande una descripción:</strong>{" "}
+                  <strong>Descripción:</strong>{" "}
                   {cursoSeleccionado.descripcion}
                 </p>
                 <p>
-                  <strong>Selecciona un docente:</strong>{" "}
+                  <strong>Docente:</strong>{" "}
                   {cursoSeleccionado.docente}
                 </p>
                 <p>
-                  <strong>Selecciona un grado:</strong> {cursoSeleccionado.grado}
+                  <strong>Grado:</strong> {cursoSeleccionado.grado}
                 </p>
               </div>
             </div>

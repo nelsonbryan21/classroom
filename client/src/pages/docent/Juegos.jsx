@@ -55,7 +55,7 @@ export default function Juegos() {
       doc.setFontSize(14);
       doc.text(`Grado: ${resp.grado}`, 14, 30);
       doc.text(`Tipo de Reporte: ${tipoReporte.toUpperCase()}`, 14, 40);
-      doc.text("Tipo de discapacidad: TDAH",14,50)
+      doc.text("Tipo de discapacidad: TDAH", 14, 50)
       let periodoLabel = periodo === 'todo' ? 'Historico Completo' : periodo.charAt(0).toUpperCase() + periodo.slice(1);
       if (periodo !== 'todo' && fechaSeleccionada) {
         periodoLabel += ` (${fechaSeleccionada})`;
@@ -127,7 +127,7 @@ export default function Juegos() {
           >
             <div className="informacionCurso">
               <h2>{curso.nombre}</h2>
-              <p>{curso.descripcion}</p>
+              {/* <p>{curso.descripcion}</p> */}
               <img src={curso.imagenUrl} alt="" />
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function Juegos() {
             {periodo !== "todo" && (
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <label htmlFor="fechaSeleccionada" style={{ fontWeight: "bold" }}>Seleccionar Fecha:</label>
-                <input 
+                <input
                   type={periodo === "diario" ? "date" : periodo === "semanal" ? "week" : "month"}
                   id="fechaSeleccionada"
                   value={fechaSeleccionada}

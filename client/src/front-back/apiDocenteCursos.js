@@ -21,6 +21,14 @@ export const insertAlumnoCurso = async (formData) => {
   return response.json();
 };
 
+export const updateAlumno = async (id, formData) => {
+  const response = await fetch(`${API_URL}/updateAlumno/${id}`, {
+    method: "PUT",
+    body: formData,
+  });
+  return response.json();
+};
+
 export const listAlumnosCursos = async (id) => {
   const response = await fetch(`${API_URL}/listAlumnosCursos/${id}`);
   return response.json();

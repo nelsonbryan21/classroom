@@ -4,6 +4,8 @@ import "../styles/login.css";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import Toast from "../components/Toast";
+import SplashLogin from "../components/SplashLogin";
+import RedirectLoader from "../components/RedirectLoader";
 
 const images = ["/img3.webp", "/img2.webp", "/fondoLogin.jpg"];
 
@@ -17,6 +19,8 @@ export default function Login() {
   const [errorMsg, setErrorMsg] = useState("");
 
   const [currentImage, setCurrentImage] = useState(0);
+  const [showSplash, setShowSplash] = useState(true);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // useEffect(() => {
   //   const storedUser = localStorage.getItem("user");
@@ -37,16 +41,20 @@ export default function Login() {
 
   useEffect(() => {
     if (user) {
-      switch (user.rol) {
-        case "director":
-          navigate("/dashboard", { replace: true });
-          break;
-        case "docente":
-          navigate("/mis-cursos", { replace: true });
-          break;
-        default:
-          break;
-      }
+      setIsRedirecting(true);
+      const timer = setTimeout(() => {
+        switch (user.rol) {
+          case "director":
+            navigate("/dashboard", { replace: true });
+            break;
+          case "docente":
+            navigate("/mis-cursos", { replace: true });
+            break;
+          default:
+            break;
+        }
+      }, 1500);
+      return () => clearTimeout(timer);
     }
   }, [user, navigate]);
   const handleLogin = async (e) => {
@@ -75,17 +83,20 @@ export default function Login() {
     //   }
     // }
     if (res.success) {
-      switch (res.user.rol) {
-        case "director":
-          navigate("/dashboard", { replace: true });
-          break;
-        case "docente":
-          navigate("/mis-cursos", { replace: true });
-          break;
-        default:
-          navigate("/", { replace: true });
-          break;
-      }
+      setIsRedirecting(true);
+      setTimeout(() => {
+        switch (res.user.rol) {
+          case "director":
+            navigate("/dashboard", { replace: true });
+            break;
+          case "docente":
+            navigate("/mis-cursos", { replace: true });
+            break;
+          default:
+            navigate("/", { replace: true });
+            break;
+        }
+      }, 2000);
     } else {
       setErrorMsg(res.error);
     }
@@ -109,10 +120,14 @@ export default function Login() {
   });
 
   return (
-    <div
-      className="boxLogin"
-      style={{ backgroundImage: `url(${images[currentImage]})` }}
-    >
+    <>
+      {showSplash && <SplashLogin onFinish={() => setShowSplash(false)} />}
+      {isRedirecting && <RedirectLoader message="Iniciando sesión..." />}
+      
+      <div
+        className="boxLogin"
+        style={{ backgroundImage: `url(${images[currentImage]})` }}
+      >
       <div className="loginContent">
         <h3>Bienvenido a la plataforma de gestion estudiantil</h3>
         <div className="cardLogin">
@@ -172,5 +187,6 @@ export default function Login() {
         </div>
       </div>
     </div>
+    </>
   );
 }

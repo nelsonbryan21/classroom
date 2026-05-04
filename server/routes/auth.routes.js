@@ -13,6 +13,7 @@ const {
   registerUsers,
   listUsers,
   sendValidationCode,
+  updateUser,
 } = require("../controllers/register.controller");
 const {
   getListDocentes,
@@ -52,6 +53,7 @@ const {
   insertParticipaciones,
   generarReporteCurso,
   updateParticipaciones,
+  updateAlumno,
 } = require("../controllers/docente.controller");
 
 // imagenes de docentes
@@ -160,6 +162,7 @@ router.get("/validateToken", validateToken);
 router.post("/registerUsers", upload.single("image"), registerUsers);
 router.post("/sendValidationCode", sendValidationCode);
 router.get("/listUsers", listUsers);
+router.put("/updateUser/:id", upload.single("image"), updateUser);
 
 // director
 router.get("/listDocentes", getListDocentes);
@@ -175,6 +178,11 @@ router.post(
   "/insertAlumnoCursos",
   upload2.single("image"),
   insertAlumnoCurso
+);
+router.put(
+  "/updateAlumno/:id",
+  upload2.single("image"),
+  updateAlumno
 );
 router.get("/listAlumnosCursos/:id", listAlumnosCursos);
 router.delete("/deleteAlumnoCurso/:id", deleteAlumnoCurso);

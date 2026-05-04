@@ -56,14 +56,14 @@ const DashboardDocente = () => {
   const generarPDF = () => {
     const doc = new jsPDF();
 
-    doc.text("Reporte de Asistencia", 14, 15);
+    doc.text("Reporte de Asistencia del Alumnado", 14, 15);
 
-    const tableColumn = ["Nombre", "Apellido", "Grado", "Curso", "Discapacidad"];
+    const tableColumn = ["Nombre", "Apellido", "Grado", "Curso"];
     const tableRows = [];
 
     alumnosCurso.forEach((fila) => {
 
-      tableRows.push([fila.nombre, fila.apellido, fila.grado, fila.curso, fila.discapacidad]);
+      tableRows.push([fila.nombre, fila.apellido, fila.grado, fila.curso]);
     });
 
     autoTable(doc, {
@@ -95,7 +95,7 @@ const DashboardDocente = () => {
             {
               label: "Asistencia promedio (%)",
               data: stats.asistencia.map((a) => a.promedio),
-              backgroundColor: "#4a90e2",
+              backgroundColor: ["#4A90E2", "#50E3C2", "#F5A623", "#D0021B", "#9013FE", "#F8E71C", "#8B572A"],
               borderRadius: 5,
             },
           ],
@@ -118,7 +118,7 @@ const DashboardDocente = () => {
             {
               label: "Alumnos por curso",
               data: stats.alumnosCount.map((a) => a.alumnos),
-              backgroundColor: "#4a90e2",
+              backgroundColor: ["#50E3C2", "#F5A623", "#D0021B", "#9013FE", "#F8E71C", "#8B572A", "#4A90E2"],
               borderRadius: 5,
             },
           ],
@@ -191,14 +191,14 @@ const DashboardDocente = () => {
             <p>No hay datos de notas aún.</p>
           )}
         </div>
-        <div className="docente-chart">
+        {/* <div className="docente-chart">
           <h2> Cantidad de participaciones por Curso</h2>
           {alumnosClase.labels.length > 0 ? (
             <Bar data={alumnosClase} />
           ) : (
             <p>No hay datos de notas aún.</p>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );

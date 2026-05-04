@@ -5,6 +5,7 @@ import {
   desactivarUser,
   getListUsers,
   registerUser,
+  updateUser,
 } from "../../front-back/apiDirector";
 import Swal from "sweetalert2";
 import Table from "../../components/Table";
@@ -12,12 +13,15 @@ import Toast from "../../components/Toast";
 
 function GestionUsuarios() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [alerta, setAlerta] = useState({ mensaje: "", error: false });
   const [data, setData] = useState({
     nombre: "",
     apellido: "",
     correo: "",
     contrasena: "",
+    dni: "",
     rol: "docente",
     imagen: null,
     imagenPreview: "",
@@ -48,11 +52,17 @@ function GestionUsuarios() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!data.nombre.trim() || !data.apellido.trim() || !data.correo.trim() || !data.dni.trim() || (!isEditing && !data.contrasena.trim())) {
+      Toast("Error", "Por favor, complete todos los campos obligatorios.", "error");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("nombre", data.nombre);
     formData.append("apellido", data.apellido);
     formData.append("correo", data.correo);
-    formData.append("contrasena", data.contrasena);
+    if (data.contrasena) formData.append("contrasena", data.contrasena);
     formData.append("dni", data.dni);
     formData.append("rol", data.rol);
     formData.append("adminBypass", "true"); 
@@ -61,25 +71,35 @@ function GestionUsuarios() {
       formData.append("image", data.imagen);
     }
 
-    const response = await registerUser(formData);
+    let response;
+    if (isEditing) {
+      response = await updateUser(editId, formData);
+    } else {
+      response = await registerUser(formData);
+    }
 
     if (response.success) {
       getDataUsers();
       handleCerrarModal();
       setAlerta({
-        mensaje: "Usuario creado exitosamente",
+        mensaje: isEditing ? "Docente actualizado exitosamente" : "Docente creado exitosamente",
         error: false,
       });
+    } else {
+      Toast("Error", response.error || "Hubo un error", "error");
     }
   };
 
   const handleCerrarModal = () => {
     setIsModalOpen(false);
+    setIsEditing(false);
+    setEditId(null);
     setData({
       nombre: "",
       apellido: "",
       correo: "",
       contrasena: "",
+      dni: "",
       rol: "docente",
       imagen: null,
       imagenPreview: "",
@@ -97,12 +117,28 @@ function GestionUsuarios() {
     if (response.success) {
       Swal.fire({
         icon: "success",
-        title: "Usuario Eliminado exitosamente",
+        title: "Docente Eliminado exitosamente",
         showConfirmButton: false,
         timer: 1500,
       });
       getDataUsers();
     }
+  };
+
+  const handleEdit = (docente) => {
+    setIsEditing(true);
+    setEditId(docente.id);
+    setData({
+      nombre: docente.nombre || "",
+      apellido: docente.apellido || "",
+      correo: docente.correo || "",
+      contrasena: "",
+      dni: docente.dni || "",
+      rol: "docente",
+      imagen: null,
+      imagenPreview: docente.imagen || "",
+    });
+    setIsModalOpen(true);
   };
 
   useEffect(() => {
@@ -111,19 +147,24 @@ function GestionUsuarios() {
 
   return (
     <div className="containerGestion">
-      <p className="titleGestion">Administracion de usuarios</p>
+      <p className="titleGestion">Administración de docentes</p>
       <div className="containerbuttons">
         <div
           className="buttonGestion"
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setIsEditing(false);
+            setEditId(null);
+            setData({ nombre: "", apellido: "", correo: "", contrasena: "", dni: "", rol: "docente", imagen: null, imagenPreview: "" });
+            setIsModalOpen(true);
+          }}
         >
-          Crear Usuario
+          Crear Docente
         </div>
 
         <Modal
           isOpen={isModalOpen}
           onClose={() => handleCerrarModal()}
-          title="Crear usuario"
+          title={isEditing ? "Editar Docente" : "Crear Docente"}
         >
           <form className="formModal" onSubmit={handleSubmit}>
             <div className="boxInformacion">
@@ -244,7 +285,7 @@ function GestionUsuarios() {
                 />
               </div>
               <button className="buttonModal" type="submit">
-                Crear
+                {isEditing ? "Actualizar" : "Crear"}
               </button>
             </div>
           </form>
@@ -279,6 +320,7 @@ function GestionUsuarios() {
           return user.estado === filtroEstado;
         })}
         onDesactivar={handleDesactivar}
+        onEdit={handleEdit}
       />
     </div>
   );

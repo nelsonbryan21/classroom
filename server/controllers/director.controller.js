@@ -72,8 +72,9 @@ const dataDashboard = async (req, res) => {
       `,
     );
     const cursos = await pool.query(
-      `select count(*) from clases 
-      `,
+      `select count(c.id) from clases c 
+       inner join docentes d on c.docente_id = d.id 
+       where d.estado = 'activo'`
     );
     const planTrabajo = await pool.query(
       `select count(*) from planes_trabajo 

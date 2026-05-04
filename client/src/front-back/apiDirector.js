@@ -9,6 +9,14 @@ export const registerUser = async (formData) => {
   return response.json();
 };
 
+export const updateUser = async (id, formData) => {
+  const response = await fetch(`${API_URL}/updateUser/${id}`, {
+    method: "PUT",
+    body: formData,
+  });
+  return response.json();
+};
+
 export const sendValidationCode = async (correo) => {
   const response = await fetch(`${API_URL}/sendValidationCode`, {
     method: "POST",
@@ -38,7 +46,7 @@ export const getListCursos = async () => {
 export const insertCurso = async (formData) => {
   const response = await fetch(`${API_URL}/insertCurso`, {
     method: "POST",
-    body: formData, // NO headers aquí
+    body: formData,
   });
 
   if (!response.ok) {

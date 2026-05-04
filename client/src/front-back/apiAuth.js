@@ -21,7 +21,7 @@ export const login = async (username, password) => {
     return { data };
 
   } catch (error) {
-    console.error("Login error:", error);
+    // console.error("Login error:", error);
     return { success: false, error: "Error en la petición" };
   }
 };

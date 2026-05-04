@@ -63,6 +63,44 @@ const insertAlumnoCurso = async (req, res) => {
   }
 };
 
+const updateAlumno = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, apellido } = req.body;
+    let imagenQuery = "";
+    let values = [nombre, apellido, id];
+
+    if (req.file) {
+      const dir = "uploads/img/alumnosCursos";
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      
+      const ext = path.extname(req.file.originalname);
+      const sanitizedNombre = nombre.trim().replace(/\s+/g, "_");
+      const sanitizedApellido = apellido.trim().replace(/\s+/g, "_");
+      const newFileName = `${sanitizedNombre}_${sanitizedApellido}_updated_${Date.now()}${ext}`;
+      const newPath = path.join(dir, newFileName);
+      fs.renameSync(req.file.path, newPath);
+
+      imagenQuery = ", imagenalumno = $4";
+      values.push(newFileName);
+    }
+
+    const result = await pool.query(
+      `UPDATE alumnos SET nombre = $1, apellido = $2 ${imagenQuery} WHERE id = $3 RETURNING *`,
+      values
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Alumno no encontrado" });
+    }
+
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error("Error al actualizar alumno:", error);
+    res.status(500).json({ error: "Error al actualizar alumno" });
+  }
+};
+
 const listAlumnosCursos = async (req, res) => {
   const BACKEND_URL =
     process.env.BACKEND_URL || "http://localhost:5000";
@@ -1001,4 +1039,5 @@ module.exports = {
   insertParticipaciones,
   generarReporteCurso,
   updateParticipaciones,
+  updateAlumno,
 };

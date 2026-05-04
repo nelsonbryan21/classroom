@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Toast from "../components/Toast";
+import RedirectLoader from "../components/RedirectLoader";
 import { registerUser, sendValidationCode } from "../front-back/apiDirector";
 import "../styles/registro.css";
 
@@ -22,6 +23,7 @@ export default function Registro() {
   const [image, setImage] = useState(null);
   const [currentImage, setCurrentImage] = useState(0);
   const [codeSent, setCodeSent] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -68,7 +70,10 @@ export default function Registro() {
           text: "Usuario registrado correctamente",
           confirmButtonColor: "#3b82f6"
         }).then(() => {
-          navigate("/login");
+          setIsRedirecting(true);
+          setTimeout(() => {
+            navigate("/login");
+          }, 2000);
         });
       } else {
         Toast("Error", data?.error || "Ocurrió un error al registrar", "error");
@@ -80,10 +85,12 @@ export default function Registro() {
   };
 
   return (
-    <div
-      className="boxRegistro"
-      style={{ backgroundImage: `url(${images[currentImage]})` }}
-    >
+    <>
+      {isRedirecting && <RedirectLoader message="Preparando tu cuenta..." />}
+      <div
+        className="boxRegistro"
+        style={{ backgroundImage: `url(${images[currentImage]})` }}
+      >
       <div className="registroContent">
         <h3>Registro de Usuario</h3>
         <form onSubmit={handleSubmit}>
@@ -220,5 +227,6 @@ export default function Registro() {
         </form>
       </div>
     </div>
+    </>
   );
 }

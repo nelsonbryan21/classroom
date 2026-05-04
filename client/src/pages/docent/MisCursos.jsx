@@ -5,6 +5,7 @@ import {
   listAlumnosCursos,
   getFechasAsistencia,
   getAsistenciaFecha,
+  updateAlumno,
 } from "../../front-back/apiDocenteCursos";
 import "../../styles/docente/misCursos.css";
 import "../../App.css";
@@ -22,6 +23,8 @@ export default function MisCursos() {
   const [discapacidad, setDiscapacidad] = useState("TDAH");
   const [nombreAlumno, setNombreAlumno] = useState("");
   const [apellidoAlumno, setApellidoAlumno] = useState("");
+  const [isEditingAlumno, setIsEditingAlumno] = useState(false);
+  const [editAlumnoId, setEditAlumnoId] = useState(null);
   const [isOpenAgregar, setIsOpenAgregar] = useState(false);
   const [isOpenAsistencia, setIsOpenAsistencia] = useState(false);
   const [isOpenDetalles, setIsOpenDetalles] = useState(false);
@@ -50,6 +53,11 @@ export default function MisCursos() {
   const handleCloseAgregar = () => {
     setPreview(null);
     setIsOpenAgregar(false);
+    setIsEditingAlumno(false);
+    setEditAlumnoId(null);
+    setNombreAlumno("");
+    setApellidoAlumno("");
+    setFile(null);
   };
 
   const handleImageChange = (event) => {
@@ -67,6 +75,22 @@ export default function MisCursos() {
 
   const handleAgregarAlumno = (id) => {
     setIdCurso(id);
+    setIsEditingAlumno(false);
+    setEditAlumnoId(null);
+    setNombreAlumno("");
+    setApellidoAlumno("");
+    setFile(null);
+    setPreview(null);
+    setIsOpenAgregar(true);
+  };
+
+  const handleEditAlumno = (alumno) => {
+    setIsEditingAlumno(true);
+    setEditAlumnoId(alumno.id);
+    setNombreAlumno(alumno.nombre);
+    setApellidoAlumno(alumno.apellido);
+    setPreview(alumno.imagenUrl || null);
+    setFile(null);
     setIsOpenAgregar(true);
   };
 
@@ -137,7 +161,17 @@ export default function MisCursos() {
     formData.append("image", file);
     formData.append("curso", idCurso);
     try {
-      const response = await insertAlumnoCurso(formData);
+      let response;
+      if (isEditingAlumno) {
+        response = await updateAlumno(editAlumnoId, formData);
+        if (isOpenAdminAlumnos) {
+          const resAlumnos = await listAlumnosCursos(idCurso);
+          setAlumnos(resAlumnos);
+        }
+      } else {
+        response = await insertAlumnoCurso(formData);
+      }
+
       if (response.error) {
         setNotification(response.error);
       }
@@ -146,9 +180,11 @@ export default function MisCursos() {
       setIsOpenAgregar(false);
       setIdCurso(null);
       setFile(null);
-      setDiscapacidad(null);
-      setNombreAlumno(null);
-      setApellidoAlumno(null);
+      setDiscapacidad("TDAH");
+      setNombreAlumno("");
+      setApellidoAlumno("");
+      setIsEditingAlumno(false);
+      setEditAlumnoId(null);
     } catch (error) {
       console.log(error);
       setNotification("Error al agregar alumno");
@@ -201,7 +237,7 @@ export default function MisCursos() {
           <div className="cursoCard" key={curso.id}>
             <div className="informacionCurso">
               <h2>{curso.nombre}</h2>
-              <p>{curso.descripcion}</p>
+              {/* <p>{curso.descripcion}</p> */}
               <img src={curso.imagenUrl} alt="" />
             </div>
 
@@ -227,13 +263,33 @@ export default function MisCursos() {
         ))}
       </div>
 
+      {/* modal administrar alumnos */}
+      <Modal
+        isOpen={isOpenAdminAlumnos}
+        onClose={() => {
+          setIsOpenAdminAlumnos(false);
+        }}
+        title="Administracion de alumnos"
+      >
+        <div
+          className="containerDetallesCurso"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "20px",
+          }}
+        >
+          <TablaAlumnos alumnos={alumnos} setAlumnos={setAlumnos} onEdit={handleEditAlumno} />
+        </div>
+      </Modal>
+
       {/* modal agregar alumnos */}
       <Modal
         isOpen={isOpenAgregar}
         onClose={() => {
           handleCloseAgregar();
         }}
-        title="Agregar alumnos"
+        title={isEditingAlumno ? "Editar alumno" : "Agregar alumnos"}
         className="modalAgregarAlumnos"
       >
         <form action="" className="agregarEstudiante">
@@ -244,6 +300,7 @@ export default function MisCursos() {
                 type="text"
                 placeholder="Ingresa el nombre"
                 required
+                value={nombreAlumno}
                 onChange={(e) => setNombreAlumno(e.target.value)}
               />
             </div>
@@ -253,6 +310,7 @@ export default function MisCursos() {
                 type="text"
                 placeholder="Ingresa el apellido"
                 required
+                value={apellidoAlumno}
                 onChange={(e) => setApellidoAlumno(e.target.value)}
               />
             </div>
@@ -278,7 +336,7 @@ export default function MisCursos() {
               type="file"
               id="imagen"
               name="imagen"
-              required
+              required={!isEditingAlumno}
               accept="image/*"
               onChange={handleImageChange}
             />
@@ -300,7 +358,7 @@ export default function MisCursos() {
           className="botonAgregar"
           onClick={() => hanldleSubmit()}
         >
-          Agregar
+          {isEditingAlumno ? "Actualizar" : "Agregar"}
         </button>
       </Modal>
 
@@ -383,25 +441,6 @@ export default function MisCursos() {
         </div>
       </Modal>
 
-      {/* modal administrar alumnos */}
-      <Modal
-        isOpen={isOpenAdminAlumnos}
-        onClose={() => {
-          setIsOpenAdminAlumnos(false);
-        }}
-        title="Administracion de alumnos"
-      >
-        <div
-          className="containerDetallesCurso"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "20px",
-          }}
-        >
-          <TablaAlumnos alumnos={alumnos} setAlumnos={setAlumnos} />
-        </div>
-      </Modal>
     </div>
   );
 }

@@ -47,7 +47,7 @@ const Dashboard = () => {
       icon: <FaChalkboardTeacher />,
     },
     {
-      titulo: "Clases",
+      titulo: "Cursos",
       cantidad: data.cursos,
       icon: <FaSchool />,
     },
@@ -64,7 +64,7 @@ const Dashboard = () => {
   };
 
   const chartData = {
-    labels: ["Alumnos", "Docentes", "Clases", "Planes de Trabajo"],
+    labels: ["Alumnos", "Docentes", "Cursos", "Planes de Trabajo"],
     datasets: [
       {
         label: "Cantidad Total",
@@ -81,7 +81,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard">
       <h1 className="dashboard-title">Panel del Director</h1>
-      <p className="dashboard-subtitle">Sistema de gestion escolar</p>
+      <p className="dashboard-subtitle">Datos del sistema de gestion escolar</p>
 
       <div className="dashboard-cards">
         {cards.map((item, index) => (

@@ -59,7 +59,7 @@ const menuItems = {
     },
     {
       path: "/gestionUsuarios",
-      label: "Gestión de Usuarios",
+      label: "Gestión de Docentes",
       icon: <FaUsers />,
     },
     { path: "/cursos", label: "Cursos", icon: <FaBook /> },
