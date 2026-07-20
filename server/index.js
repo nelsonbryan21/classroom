@@ -46,6 +46,12 @@ console.log("Cargando rutas...");
 const authRoutes2 = require('./routes/auth.routes');
 console.log("Rutas cargadas");
 
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: "ok"
+  });
+});
+
 app.listen(PORT, "0.0.0.0",() => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
 });
