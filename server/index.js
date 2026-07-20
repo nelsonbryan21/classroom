@@ -43,7 +43,7 @@ app.get("/test-office", (req, res) => {
 });
 
 console.log("Cargando rutas...");
-const authRoutes = require('./routes/auth.routes');
+const authRoutes2 = require('./routes/auth.routes');
 console.log("Rutas cargadas");
 
 app.listen(PORT, "0.0.0.0",() => {
