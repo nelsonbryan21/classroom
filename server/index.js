@@ -42,11 +42,10 @@ app.get("/test-office", (req, res) => {
   });
 });
 
+console.log("Cargando rutas...");
+const authRoutes = require('./routes/auth.routes');
+console.log("Rutas cargadas");
 
 app.listen(PORT, "0.0.0.0",() => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
-});
-
-app.get('/health', (req, res) => {
-  res.status(200).json({ ok: true });
 });
