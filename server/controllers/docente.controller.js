@@ -19,7 +19,9 @@ const listCursosDocente = async (req, res) => {
 
     const resultImage = result.rows.map((curso) => ({
       ...curso,
-      imagenUrl: `${BACKEND_URL}/uploads/img/cursos/${curso.imagencurso}`,
+      imagenUrl: curso.imagencurso
+        ? (curso.imagencurso.startsWith("http") ? curso.imagencurso : `${BACKEND_URL}/uploads/img/cursos/${curso.imagencurso}`)
+        : null,
     }));
 
     res.status(200).json(resultImage);
@@ -34,20 +36,23 @@ const insertAlumnoCurso = async (req, res) => {
     const { discapacidad, nombre, apellido, curso } = req.body;
     let imagen = null;
 
-    const dir = "uploads/img/alumnosCursos";
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
     if (req.file) {
-      const ext = path.extname(req.file.originalname);
-      const sanitizedNombre = nombre.trim().replace(/\s+/g, "_");
-      const sanitizedApellido = apellido.trim().replace(/\s+/g, "_");
-      const newFileName = `${sanitizedNombre}_${sanitizedApellido}_${curso}${ext}`;
-      const newPath = path.join(dir, newFileName);
+      if (req.file.path && req.file.path.startsWith("http")) {
+        imagen = req.file.path;
+      } else {
+        const dir = "uploads/img/alumnosCursos";
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        const ext = path.extname(req.file.originalname);
+        const sanitizedNombre = nombre.trim().replace(/\s+/g, "_");
+        const sanitizedApellido = apellido.trim().replace(/\s+/g, "_");
+        const newFileName = `${sanitizedNombre}_${sanitizedApellido}_${curso}${ext}`;
+        const newPath = path.join(dir, newFileName);
 
-      fs.renameSync(req.file.path, newPath);
-      imagen = newFileName;
+        fs.renameSync(req.file.path, newPath);
+        imagen = newFileName;
+      }
     }
     const result = await pool.query(
       `INSERT INTO alumnos (nombre, apellido, discapacidad, imagenalumno, clase_id)
@@ -71,18 +76,23 @@ const updateAlumno = async (req, res) => {
     let values = [nombre, apellido, id];
 
     if (req.file) {
-      const dir = "uploads/img/alumnosCursos";
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-      
-      const ext = path.extname(req.file.originalname);
-      const sanitizedNombre = nombre.trim().replace(/\s+/g, "_");
-      const sanitizedApellido = apellido.trim().replace(/\s+/g, "_");
-      const newFileName = `${sanitizedNombre}_${sanitizedApellido}_updated_${Date.now()}${ext}`;
-      const newPath = path.join(dir, newFileName);
-      fs.renameSync(req.file.path, newPath);
+      if (req.file.path && req.file.path.startsWith("http")) {
+        imagenQuery = ", imagenalumno = $4";
+        values.push(req.file.path);
+      } else {
+        const dir = "uploads/img/alumnosCursos";
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        
+        const ext = path.extname(req.file.originalname);
+        const sanitizedNombre = nombre.trim().replace(/\s+/g, "_");
+        const sanitizedApellido = apellido.trim().replace(/\s+/g, "_");
+        const newFileName = `${sanitizedNombre}_${sanitizedApellido}_updated_${Date.now()}${ext}`;
+        const newPath = path.join(dir, newFileName);
+        fs.renameSync(req.file.path, newPath);
 
-      imagenQuery = ", imagenalumno = $4";
-      values.push(newFileName);
+        imagenQuery = ", imagenalumno = $4";
+        values.push(newFileName);
+      }
     }
 
     const result = await pool.query(
@@ -115,7 +125,9 @@ const listAlumnosCursos = async (req, res) => {
 
     const resultImage = result.rows.map((alumno) => ({
       ...alumno,
-      imagenUrl: `${BACKEND_URL}/uploads/img/alumnosCursos/${alumno.imagenalumno}`,
+      imagenUrl: alumno.imagenalumno
+        ? (alumno.imagenalumno.startsWith("http") ? alumno.imagenalumno : `${BACKEND_URL}/uploads/img/alumnosCursos/${alumno.imagenalumno}`)
+        : null,
     }));
 
     res.status(200).json(resultImage);
@@ -179,26 +191,29 @@ const materialCurso = async (req, res) => {
     );
     const idDocenteReal = idDocenteLimpio.rows[0].id;
 
-    const dir = path.join(
-      "uploads",
-      "docs",
-      idDocenteReal.toString(),
-      gradoCurso.toString(),
-    );
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
+    let finalPath = req.file.path;
+    if (!req.file.path.startsWith("http")) {
+      const dir = path.join(
+        "uploads",
+        "docs",
+        idDocenteReal.toString(),
+        gradoCurso.toString(),
+      );
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
 
-    const tempPath = req.file.path;
-    const newPath = path.join(dir, req.file.filename);
-    fs.renameSync(tempPath, newPath);
+      const tempPath = req.file.path;
+      finalPath = path.join(dir, req.file.filename);
+      fs.renameSync(tempPath, finalPath);
+    }
 
     // Guardar registro en la base de datos
     const result = await pool.query(
       `INSERT INTO documentos (titulo, ruta_archivo, fecha_subida, docente_id, grado, curso_id, linkVideo)
        VALUES ($1, $2, NOW(), $3, $4, $5, $6)
        RETURNING *`,
-      [nombre, newPath, idDocenteReal, gradoCurso, curso, urlVideo],
+      [nombre, finalPath, idDocenteReal, gradoCurso, curso, urlVideo],
     );
 
     res.status(201).json({
@@ -612,14 +627,17 @@ const uploadPlanTrabajo = async (req, res) => {
         .json({ error: "No se envió ningún archivo" });
     }
 
-    const dir = "uploads/docs/planes";
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+    let newPath = req.file.path;
+    if (!req.file.path.startsWith("http")) {
+      const dir = "uploads/docs/planes";
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      const ext = path.extname(req.file.originalname);
+      const newFileName = `Plan_${Date.now()}${ext}`;
+      newPath = path.join(dir, newFileName);
+      fs.renameSync(req.file.path, newPath);
     }
-    const ext = path.extname(req.file.originalname);
-    const newFileName = `Plan_${Date.now()}${ext}`;
-    const newPath = path.join(dir, newFileName);
-    fs.renameSync(req.file.path, newPath);
 
     const result = await pool.query(
       `INSERT INTO planes_trabajo (titulo, descripcion, ruta_archivo, fecha, curso_id)
@@ -653,11 +671,12 @@ const listPlanesTrabajo = async (req, res) => {
       process.env.BACKEND_URL || "http://localhost:5000";
 
     const planesWithUrl = result.rows.map((plan) => {
-      const normalizedPath = plan.ruta_archivo.replace(/\\/g, "/");
+      const isHttp = plan.ruta_archivo && plan.ruta_archivo.startsWith("http");
+      const normalizedPath = plan.ruta_archivo ? plan.ruta_archivo.replace(/\\/g, "/") : "";
 
       return {
         ...plan,
-        ruta_archivo: `${BACKEND_URL}/${normalizedPath}`,
+        ruta_archivo: isHttp ? plan.ruta_archivo : `${BACKEND_URL}/${normalizedPath}`,
       };
     });
 

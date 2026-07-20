@@ -21,7 +21,9 @@ const getListCursos = async (req, res) => {
       from clases c inner join docentes d on c.docente_id = d.id where d.estado = 'activo'`);
     const resultImage = result.rows.map((curso) => ({
       ...curso,
-      imagenUrl: `${BACKEND_URL}/uploads/img/cursos/${curso.imagen}`,
+      imagenUrl: curso.imagen
+        ? (curso.imagen.startsWith("http") ? curso.imagen : `${BACKEND_URL}/uploads/img/cursos/${curso.imagen}`)
+        : null,
     }));
     res.status(200).json(resultImage);
   } catch (error) {
@@ -46,7 +48,7 @@ const getListCursos = async (req, res) => {
 
 const insertCurso = async (req, res) => {
   const { nombre, descripcion, docente, grado } = req.body;
-  const imagen = req.file ? req.file.filename : null;
+  const imagen = req.file ? (req.file.path || req.file.filename) : null;
 
   try {
     const result = await pool.query(
@@ -108,10 +110,11 @@ const listAllPlanesTrabajo = async (req, res) => {
       process.env.BACKEND_URL || "http://localhost:5000";
 
     const planesWithUrl = result.rows.map((plan) => {
-      const normalizedPath = plan.ruta_archivo.replace(/\\/g, "/");
+      const isHttp = plan.ruta_archivo && plan.ruta_archivo.startsWith("http");
+      const normalizedPath = plan.ruta_archivo ? plan.ruta_archivo.replace(/\\/g, "/") : "";
       return {
         ...plan,
-        ruta_archivo: `${BACKEND_URL}/${normalizedPath}`,
+        ruta_archivo: isHttp ? plan.ruta_archivo : `${BACKEND_URL}/${normalizedPath}`,
       };
     });
 

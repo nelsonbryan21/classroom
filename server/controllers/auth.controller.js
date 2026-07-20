@@ -29,7 +29,9 @@ const login = async (req, res) => {
       nombreDirector: user.nombredirector,
       apellidoDirector: user.apellidodirector,
       dniDirector: user.dnidirector,
-      imagen: `${backendUrl}/uploads/img/perfil/${user.imagen}`,
+      imagen: user.imagen
+        ? (user.imagen.startsWith("http") ? user.imagen : `${backendUrl}/uploads/img/perfil/${user.imagen}`)
+        : null,
     };
 
 

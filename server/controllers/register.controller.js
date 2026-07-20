@@ -62,7 +62,7 @@ const sendValidationCode = async (req, res) => {
 
 const registerUsers = async (req, res) => {
   const { correo, contrasena, rol, nombre, apellido, dni, codigo, adminBypass } = req.body;
-  const image = req.file ? req.file.filename : null;
+  const image = req.file ? (req.file.path || req.file.filename) : null;
 
   // Validar Código Único de Registro enviado al correo, excepto si viene del Director (adminBypass)
   if (adminBypass !== "true") {
@@ -148,7 +148,7 @@ const listUsers = async (req, res) => {
     const usersWithImageUrl = result.rows.map((user) => ({
       ...user,
       imagen: user.imagen
-        ? `${BACKEND_URL}/uploads/img/perfil/${user.imagen}`
+        ? (user.imagen.startsWith("http") ? user.imagen : `${BACKEND_URL}/uploads/img/perfil/${user.imagen}`)
         : null,
     }));
 
@@ -163,7 +163,7 @@ const listUsers = async (req, res) => {
 const updateUser = async (req, res) => {
   const docenteId = req.params.id;
   const { nombre, apellido, correo, dni, contrasena } = req.body;
-  const image = req.file ? req.file.filename : null;
+  const image = req.file ? (req.file.path || req.file.filename) : null;
 
   try {
     const docenteRes = await pool.query("SELECT usuario_id FROM docentes WHERE id = $1", [docenteId]);

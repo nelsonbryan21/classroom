@@ -56,104 +56,13 @@ const {
   updateAlumno,
 } = require("../controllers/docente.controller");
 
-// imagenes de docentes
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/img/perfil");
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + path.extname(file.originalname);
-    cb(null, uniqueSuffix);
-  },
-});
-
-const upload = multer({ storage });
-
-// imagenes de alumnos
-const storage2 = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/img/alumnosCursos");
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + path.extname(file.originalname);
-    cb(null, uniqueSuffix);
-  },
-});
-const upload2 = multer({ storage: storage2 });
-
-// middleware para subir material de trabajo
-
-const storageMaterial = multer.diskStorage({
-  destination: (req, file, cb) => {
-
-    cb(null, "uploads/docs/temp");
-    if (!fs.existsSync("uploads/docs/temp")) {
-      fs.mkdirSync("uploads/docs/temp", { recursive: true });
-    }
-  },
-  filename: (req, file, cb) => {
-    const timestamp = Date.now();
-    const ext = path.extname(file.originalname);
-    const sanitizedName = file.originalname
-      .replace(ext, "")
-      .trim()
-      .replace(/\s+/g, "_"); // reemplaza espacios por _
-    cb(null, `${sanitizedName}_${timestamp}${ext}`);
-  },
-})
-const uploadMaterial = multer({ storage: storageMaterial });
-
-const storagePlanTrabajo = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = "uploads/docs/planes";
-
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    cb(null, dir);
-  },
-
-  filename: (req, file, cb) => {
-    const timestamp = Date.now();
-    const ext = path.extname(file.originalname);
-
-    const sanitizedName = file.originalname
-      .replace(ext, "")
-      .trim()
-      .replace(/\s+/g, "_");
-
-    cb(null, `${sanitizedName}_${timestamp}${ext}`);
-  },
-});
-
-const uploadPlan = multer({ storage: storagePlanTrabajo });
-
-const storageImageCurso = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = "uploads/img/cursos";
-
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    cb(null, dir);
-  },
-
-  filename: (req, file, cb) => {
-    const timestamp = Date.now();
-    const ext = path.extname(file.originalname);
-
-    const sanitizedName = file.originalname
-      .replace(ext, "")
-      .trim()
-      .replace(/\s+/g, "_");
-
-    cb(null, `${sanitizedName}_${timestamp}${ext}`);
-  },
-});
-
-const cursosUpload = multer({ storage: storageImageCurso });
+const {
+  uploadPerfil: upload,
+  uploadAlumnos: upload2,
+  uploadMaterial,
+  uploadPlan,
+  uploadCursos: cursosUpload,
+} = require("../config/cloudinary");
 
 router.post("/login", login);
 router.post("/register", upload.single("image"), register);

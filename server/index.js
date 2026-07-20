@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 require('dotenv').config();
+require('./config/cloudinary');
 const { exec } = require("child_process");
 const dns = require("dns");
 
