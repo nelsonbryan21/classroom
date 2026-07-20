@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 require('dotenv').config();
+const { exec } = require("child_process");
 
 const app = express();
 
@@ -32,4 +33,17 @@ app.use('/api', authRoutes);
 
 
 
+app.get("/test-office", (req, res) => {
+  exec("soffice --version", (error, stdout, stderr) => {
+    if (error) {
+      return res.status(500).json({
+        error: error.message
+      });
+    }
+
+    res.json({
+      libreoffice: stdout
+    });
+  });
+});
 
