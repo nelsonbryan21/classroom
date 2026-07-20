@@ -16,7 +16,12 @@ const sendValidationCode = async (req, res) => {
 
   try {
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      // service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      family: 4,
+
       auth: {
         user: process.env.EMAIL_USER || "iesanantonio3@gmail.com",
         pass: process.env.EMAIL_PASS || "drtp nlfu bolx qhnw",
