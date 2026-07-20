@@ -1,4 +1,5 @@
-const API_URL = "http://localhost:5000/api";
+// const API_URL = "http://localhost:5000/api";
+const API_URL = "https://classroom-production-6289.up.railway.app/api";
 // const API_URL = "https://classroom-09y7.onrender.com/api";
 
 export const login = async (username, password) => {
