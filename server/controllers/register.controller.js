@@ -15,21 +15,35 @@ const sendValidationCode = async (req, res) => {
   verificationCodes.set(correo, { code, timestamp: Date.now() });
 
   try {
-    const transporter = nodemailer.createTransport({
-      // service: "gmail",
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      family: 4,
+    // const transporter = nodemailer.createTransport({
+    //   // service: "gmail",
+    //   host: "smtp.gmail.com",
+    //   port: 587,
+    //   secure: false,
+    //   family: 4,
 
-      auth: {
-        user: process.env.EMAIL_USER || "iesanantonio3@gmail.com",
-        pass: process.env.EMAIL_PASS || "drtp nlfu bolx qhnw",
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
+    //   auth: {
+    //     user: process.env.EMAIL_USER || "iesanantonio3@gmail.com",
+    //     pass: process.env.EMAIL_PASS || "drtp nlfu bolx qhnw",
+    //   },
+    //   tls: {
+    //     rejectUnauthorized: false,
+    //   },
+    // });
+    const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  lookup: (hostname, options, callback) => {
+    require("dns").lookup(hostname, {
+      family: 4,
+    }, callback);
+  },
+});
 
     const mailOptions = {
       from: process.env.EMAIL_USER || "iesanantonio3@gmail.com",
