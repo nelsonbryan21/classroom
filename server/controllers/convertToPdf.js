@@ -2,7 +2,8 @@ const { exec } = require("child_process");
 const path = require("path");
 
 const LO_COMMAND = "soffice";
-const oficcePath = process.env.OFFICE_PATH || "C:\\Program Files\\LibreOffice\\program\\soffice.exe";
+// const oficcePath = process.env.OFFICE_PATH || "C:\\Program Files\\LibreOffice\\program\\soffice.exe";
+const oficcePath = process.env.OFFICE_PATH || "soffice";
 /**
  * Convierte un archivo Word (.doc o .docx) a PDF
  * @param {string} inputPath - ruta absoluta del archivo Word
