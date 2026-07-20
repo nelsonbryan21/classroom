@@ -12,9 +12,6 @@ app.use(express.json());
 // const PORT = process.env.PORT || 5000;
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, "0.0.0.0",() => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
-});
 
 app.get('/', (req, res) => {
   res.send('¡Servidor backend funcionando!');
@@ -28,8 +25,6 @@ app.use('/uploads/docs', express.static(path.join(__dirname, 'uploads/docs')));
 app.use('/uploads/docs/temp', express.static(path.join(__dirname, 'uploads/docs/temp')));
 app.use('/uploads/img/cursos', express.static(path.join(__dirname, 'uploads/img/cursos')));
 app.use('/api', authRoutes);
-
-
 
 
 
@@ -47,3 +42,11 @@ app.get("/test-office", (req, res) => {
   });
 });
 
+
+app.listen(PORT, "0.0.0.0",() => {
+  console.log(`Servidor corriendo en puerto ${PORT}`);
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ ok: true });
+});
