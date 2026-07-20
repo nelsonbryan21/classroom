@@ -26,6 +26,9 @@ const sendValidationCode = async (req, res) => {
         user: process.env.EMAIL_USER || "iesanantonio3@gmail.com",
         pass: process.env.EMAIL_PASS || "drtp nlfu bolx qhnw",
       },
+      tls: {
+        rejectUnauthorized: false,
+      },
     });
 
     const mailOptions = {
