@@ -234,7 +234,7 @@ const listadoMaterialCurso = async (req, res) => {
     const result = await pool.query(
       `
       select d.id, d.titulo as titulo, d.fecha_subida as subido,
-        c.nombre, c.grado, d.docente_id, d.linkVideo 
+        c.nombre, c.grado, d.docente_id, d.linkVideo, d.ruta_archivo as ruta
         from documentos d 
 		inner join clases c on d.curso_id = c.id
 		inner join docentes de on de.id = d.docente_id
@@ -245,14 +245,19 @@ const listadoMaterialCurso = async (req, res) => {
       [id],
     );
 
-    const data = result.rows.map((m) => ({
-      id: m.id,
-      titulo: m.titulo,
-      subido: m.subido,
-      nombre: m.nombre,
-      grado: m.grado,
-      linkVideo: m.linkvideo,
-    }));
+    const data = result.rows.map((m) => {
+      const isHttp = m.ruta && m.ruta.startsWith("http");
+      const normalizedPath = m.ruta ? m.ruta.replace(/\\/g, "/") : "";
+      return {
+        id: m.id,
+        titulo: m.titulo,
+        subido: m.subido,
+        nombre: m.nombre,
+        grado: m.grado,
+        linkVideo: m.linkvideo,
+        ruta: isHttp ? m.ruta : `${BACKEND_URL}/${normalizedPath}`,
+      };
+    });
 
     res.status(200).json(data);
   } catch (error) {
@@ -260,34 +265,10 @@ const listadoMaterialCurso = async (req, res) => {
     res.status(500).json({ error: "Error en el servidor" });
   }
 };
-///trabajando aqui -> enviar la url del pdf al frontend
-// const getMaterialById = async (req, res) => {
-//   const { id } = req.params;
-//   const BACKEND_URL =
-//     process.env.BACKEND_URL || "http://localhost:5000";
-//   try {
-//     const result = await pool.query(
-//       `select d.id, d.titulo as titulo, d.ruta_archivo as ruta, d.fecha_subida as subido,
-//       c.nombre, c.grado
-//       from documentos d inner join clases c on d.curso_id = c.id where d.id = $1`,
-//       [id],
-//     );
-//     const convert = convertirWordAPdf(
-//       BACKEND_URL + result.rows[0].ruta,
-//     );
-//     console.log(convert);
-//     res.status(200).json(result.rows[0]);
-//   } catch (error) {
-//     console.error(
-//       "Error al obtener material de curso del docente:",
-//       error,
-//     );
-//     res.status(500).json({ error: "Error en el servidor" });
-//   }
-// };
 
 const getMaterialById = async (req, res) => {
   const { id } = req.params;
+  const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
 
   try {
     const result = await pool.query(
@@ -304,14 +285,24 @@ const getMaterialById = async (req, res) => {
     }
 
     const archivo = result.rows[0];
+    const isHttp = archivo.ruta && archivo.ruta.startsWith("http");
+    let pdfUrl = isHttp ? archivo.ruta : `${BACKEND_URL}/${archivo.ruta.replace(/\\/g, "/")}`;
 
-    const rutaAbsoluta = path.join(archivo.ruta);
+    if (!isHttp && archivo.ruta) {
+      try {
+        const rutaAbsoluta = path.join(archivo.ruta);
+        const pdfPath = await convertirWordAPdf(rutaAbsoluta);
+        const normalizedPdfPath = pdfPath.replace(/\\/g, "/");
+        pdfUrl = `${BACKEND_URL}/${normalizedPdfPath}`;
+      } catch (err) {
+        console.error("Error al convertir Word a PDF:", err);
+      }
+    }
 
-    const pdfPath = await convertirWordAPdf(rutaAbsoluta);
-    const normalizedPdfPath = pdfPath.replace(/\\/g, "/");
     res.status(200).json({
       ...archivo,
-      pdf: normalizedPdfPath,
+      ruta: isHttp ? archivo.ruta : `${BACKEND_URL}/${archivo.ruta.replace(/\\/g, "/")}`,
+      pdf: pdfUrl,
     });
   } catch (error) {
     console.error(
@@ -324,6 +315,7 @@ const getMaterialById = async (req, res) => {
 
 const materialPorCurso = async (req, res) => {
   const { id } = req.params;
+  const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
   try {
     const result = await pool.query(
       `
@@ -333,7 +325,16 @@ const materialPorCurso = async (req, res) => {
       [id],
     );
 
-    res.status(200).json(result.rows);
+    const data = result.rows.map((doc) => {
+      const isHttp = doc.ruta && doc.ruta.startsWith("http");
+      const normalizedPath = doc.ruta ? doc.ruta.replace(/\\/g, "/") : "";
+      return {
+        ...doc,
+        ruta: isHttp ? doc.ruta : `${BACKEND_URL}/${normalizedPath}`,
+      };
+    });
+
+    res.status(200).json(data);
   } catch (error) {
     console.error("Error al obtener cursos del docente:", error);
     res.status(500).json({ error: "Error en el servidor" });
@@ -946,6 +947,7 @@ const getDashboardStats = async (req, res) => {
 
 const getAllMaterialesPendientes = async (req, res) => {
   const { id } = req.params;
+  const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
   try {
     const result = await pool.query(
       `SELECT *
@@ -954,7 +956,15 @@ const getAllMaterialesPendientes = async (req, res) => {
       AND revisado = false;`,
       [id],
     );
-    res.status(200).json(result.rows);
+    const data = result.rows.map((doc) => {
+      const isHttp = doc.ruta_archivo && doc.ruta_archivo.startsWith("http");
+      const normalizedPath = doc.ruta_archivo ? doc.ruta_archivo.replace(/\\/g, "/") : "";
+      return {
+        ...doc,
+        ruta_archivo: isHttp ? doc.ruta_archivo : `${BACKEND_URL}/${normalizedPath}`,
+      };
+    });
+    res.status(200).json(data);
   } catch (error) {
     console.error("Error en la consulta:", error);
     res.status(500).json({ error: "Error en el servidor" });
