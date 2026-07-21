@@ -29,10 +29,14 @@ const createStorage = (folderName, localDir, isRaw = false) => {
     return new CloudinaryStorage({
       cloudinary: cloudinary,
       params: async (req, file) => {
+        const ext = path.extname(file.originalname);
+        const sanitizedName = path.parse(file.originalname).name
+          .trim()
+          .replace(/\s+/g, "_");
         return {
           folder: `classroom/${folderName}`,
           resource_type: isRaw ? "raw" : "auto",
-          public_id: `${Date.now()}_${path.parse(file.originalname).name.replace(/\s+/g, "_")}`,
+          public_id: `${Date.now()}_${sanitizedName}${ext}`,
         };
       },
     });
