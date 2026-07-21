@@ -24,7 +24,7 @@ if (isCloudinaryConfigured) {
 /**
  * Crea un engine de almacenamiento Multer (Cloudinary o Local Fallback)
  */
-const createStorage = (folderName, localDir, isRaw = false) => {
+const createStorage = (folderName, localDir) => {
   if (isCloudinaryConfigured) {
     return new CloudinaryStorage({
       cloudinary: cloudinary,
@@ -35,7 +35,8 @@ const createStorage = (folderName, localDir, isRaw = false) => {
           .replace(/\s+/g, "_");
         return {
           folder: `classroom/${folderName}`,
-          resource_type: isRaw ? "raw" : "auto",
+          resource_type: "auto",
+          access_mode: "public",
           public_id: `${Date.now()}_${sanitizedName}${ext}`,
         };
       },
@@ -61,11 +62,11 @@ const createStorage = (folderName, localDir, isRaw = false) => {
   }
 };
 
-const storagePerfil = createStorage("img/perfil", "uploads/img/perfil", false);
-const storageAlumnos = createStorage("img/alumnosCursos", "uploads/img/alumnosCursos", false);
-const storageCursos = createStorage("img/cursos", "uploads/img/cursos", false);
-const storageMaterial = createStorage("docs/temp", "uploads/docs/temp", true);
-const storagePlan = createStorage("docs/planes", "uploads/docs/planes", true);
+const storagePerfil = createStorage("img/perfil", "uploads/img/perfil");
+const storageAlumnos = createStorage("img/alumnosCursos", "uploads/img/alumnosCursos");
+const storageCursos = createStorage("img/cursos", "uploads/img/cursos");
+const storageMaterial = createStorage("docs/temp", "uploads/docs/temp");
+const storagePlan = createStorage("docs/planes", "uploads/docs/planes");
 
 module.exports = {
   cloudinary,
