@@ -29,17 +29,29 @@ const createStorage = (folderName, localDir, isRaw = false) => {
     return new CloudinaryStorage({
       cloudinary: cloudinary,
       params: async (req, file) => {
-        const ext = path.extname(file.originalname);
+        const ext = path.extname(file.originalname).toLowerCase();
         const sanitizedName = path.parse(file.originalname).name
           .trim()
           .replace(/\s+/g, "_");
+        const timestamp = Date.now();
+
+        // Si es un archivo PDF, usar resource_type "image" y format "pdf" para evitar bloqueos 401 de raw
+        if (ext === ".pdf") {
+          return {
+            folder: `classroom/${folderName}`,
+            resource_type: "image",
+            format: "pdf",
+            access_mode: "public",
+            public_id: `${timestamp}_${sanitizedName}`,
+          };
+        }
 
         if (isRaw) {
           return {
             folder: `classroom/${folderName}`,
             resource_type: "raw",
             access_mode: "public",
-            public_id: `${Date.now()}_${sanitizedName}${ext}`,
+            public_id: `${timestamp}_${sanitizedName}${ext}`,
           };
         }
 
@@ -47,7 +59,7 @@ const createStorage = (folderName, localDir, isRaw = false) => {
           folder: `classroom/${folderName}`,
           resource_type: "auto",
           access_mode: "public",
-          public_id: `${Date.now()}_${sanitizedName}`,
+          public_id: `${timestamp}_${sanitizedName}`,
         };
       },
     });
