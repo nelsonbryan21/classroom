@@ -268,7 +268,7 @@ const listadoMaterialCurso = async (req, res) => {
 
 const getMaterialById = async (req, res) => {
   const { id } = req.params;
-  const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
+  const BACKEND_URL = process.env.BACKEND_URL;
 
   try {
     const result = await pool.query(
