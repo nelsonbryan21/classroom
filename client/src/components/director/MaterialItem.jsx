@@ -13,7 +13,7 @@ export default function MaterialItem({
   const [showModal, setShowModal] = useState(false);
   const [material, setMaterial] = useState(null);
   const [loading, setLoading] = useState(false);
-  const BACKEND_URL = "http://localhost:5000/";
+  const BACKEND_URL = "https://classroom-production-6289.up.railway.app/";
 
   const handleModal = async () => {
     if (!showModal) {
@@ -71,7 +71,7 @@ export default function MaterialItem({
           </div>
         ) : material ? (
           <iframe
-            src={`${BACKEND_URL}${material.pdf}`}
+            src={material.pdf?.startsWith("http") ? material.pdf : `${BACKEND_URL}${material.pdf}`}
             title={titulo}
             width="100%"
             height="500px"
