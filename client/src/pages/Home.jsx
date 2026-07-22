@@ -15,7 +15,7 @@ export default function Home() {
           La dirección que buscas no existe o ya no está disponible. Regresa al
           inicio para continuar desde allí.
         </p>
-        <button className="not-found-button" onClick={() => navigate("/")}>
+        <button className="not-found-button" onClick={() => navigate("/login")}>
           Volver al inicio
         </button>
       </section>
